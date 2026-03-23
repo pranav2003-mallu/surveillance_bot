@@ -70,40 +70,55 @@ sudo chmod a+rw /dev/ttyUSB0
 
 ---
 
-## 🗺️ How to Create and Save a Map
+## 🗺️ Step 1: Mapping the Environment (SLAM)
 
-To navigate autonomously, we first need to drive the bot around manually to map the area.
+To map a room, the robot uses the LiDAR to scan walls while you manually drive it around.
 
-1. **Launch the Mapping Node:**
-   ```bash
-   ros2 launch surveillance_bot_description mapping.launch.py
-   ```
-   *(This script automatically launches the `rplidar_ros` node to begin scanning the room).*
+**1. Launch the Mapping Node:**
+Open Terminal 1 and run the SLAM mapping code:
+```bash
+ros2 launch surveillance_bot_description mapping.launch.py
+```
+*(This automatically launches the RPLidar, RViz2, and the `slam_toolbox` mapping node).*
 
-2. **Launch the Teleop Keyboard:**
-   In a second terminal:
-   ```bash
-   ros2 run teleop_twist_keyboard teleop_twist_keyboard
-   ```
-   Use the `I`, `J`, `K`, `L`, `,` keys to drive the robot around your environment until you have a complete map shown in RViz.
+**2. Launch the Teleop Keyboard (To Drive):**
+Open Terminal 2 and run the teleoperation node:
+```bash
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+```
+Use `I`, `J`, `K`, `L`, and `,` keys to drive the robot around. As you drive, look at your RViz window. You will see a 2D floorplan generating in real-time as the LiDAR discovers new walls.
 
-3. **Save the Map:**
-   Once your map looks complete, open a third terminal and run the map saver:
-   ```bash
-   ros2 run nav2_map_server map_saver_cli -f my_room_map
-   ```
-   This generates `my_room_map.yaml` and `my_room_map.pgm`. Move these files into your `maps` folder inside the `surveillance_bot_description` package!
+**3. Save the Map:**
+Once your entire room is mapped and the walls are fully defined in RViz, you must save it to a file. 
+Open Terminal 3 and run:
+```bash
+cd ~/surveillance_bot/src/surveillance_bot_description/maps/
+ros2 run nav2_map_server map_saver_cli -f my_room_map
+```
+This generates two files: 
+- `my_room_map.yaml` (The config file)
+- `my_room_map.pgm` (The image footprint of the map)
 
 ---
 
-## 🧭 Autonomous Navigation
-Now that you have a map, you can use Nav2 to send the robot to specific locations autonomously.
+## 🧭 Step 2: Loading the Map & Autonomous Navigation
 
-Launch the navigation stack while pointing it to the map you just saved:
+Once you have saved your map, you can load it into the Nav2 stack to unleash autonomous driving!
+
+**1. Launch Navigation and Load the Map:**
+Open a terminal, source your workspace, and launch the Navigation script, passing in the exact file path to your saved `.yaml` map file:
+
 ```bash
-ros2 launch surveillance_bot_description navigation.launch.py map:=/home/$USER/surveillance_bot/src/surveillance_bot_description/maps/my_room_map.yaml
+ros2 launch surveillance_bot_description navigation.launch.py map:=/home/mallu/surveillance_bot/src/surveillance_bot_description/maps/my_room_map.yaml
 ```
 
-**Using RViz to drive:**
-1. Click the **"2D Pose Estimate"** button at the top of RViz and click/drag on the map to tell the robot where it currently is.
-2. Click the **"Nav2 Goal"** button and click/drag on the map to tell the robot exactly where to drive autonomously!
+**2. Tell the Robot Where It Is (2D Pose Estimate):**
+When RViz opens, the robot doesn't know where it started on your map!
+- Click the **"2D Pose Estimate"** button at the top of RViz.
+- Click and drag an arrow on your map to place the 3D robot exactly where your physical robot is currently sitting, pointing in the same direction.
+
+**3. Start Autonomous Driving (Nav2 Goal):**
+Now it's time to set a waypoint!
+- Click the **"Nav2 Goal"** button at the top of RViz.
+- Click and drag a destination arrow anywhere on the map.
+- The software will calculate a safe path (avoiding obstacles) and smoothly drive the robot to that spot!
