@@ -1,0 +1,200 @@
+<?xml version="1.0" ?>
+<robot name="surveillance_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:include filename="$(find surveillance_bot_description)/urdf/materials.xacro" />
+
+<link name="base_footprint"/>
+<joint name="base_joint" type="fixed">
+  <parent link="base_footprint"/>
+  <child link="base_link"/>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+</joint>
+
+<link name="base_link">
+  <inertial>
+    <origin xyz="-1.8004119428489673e-05 3.261317635061545e-05 0.08259390768256121" rpy="0 0 0"/>
+    <mass value="11.985487330342327"/>
+    <inertia ixx="0.121804" iyy="0.191973" izz="0.249611" ixy="-0.0" iyz="8e-06" ixz="1.5e-05"/>
+  </inertial>
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="white"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="rear_right_wheel_1">
+  <inertial>
+    <origin xyz="-3.4175995545698834e-05 -0.005484874663533035 0.0002066736028292701" rpy="0 0 0"/>
+    <mass value="0.5352306866247557"/>
+    <inertia ixx="0.000808" iyy="0.001256" izz="0.000812" ixy="-0.0" iyz="-0.0" ixz="1e-06"/>
+  </inertial>
+  <visual>
+    <origin xyz="0.079859 0.1575 -0.061" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/rear_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="dark_grey"/>
+  </visual>
+  <collision>
+    <origin xyz="0.079859 0.1575 -0.061" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/rear_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="front_right_wheel_1">
+  <inertial>
+    <origin xyz="-3.35853778285905e-05 -0.005484874663532757 0.00020667360282920072" rpy="0 0 0"/>
+    <mass value="0.5352306866247557"/>
+    <inertia ixx="0.000808" iyy="0.001256" izz="0.000812" ixy="-0.0" iyz="-0.0" ixz="1e-06"/>
+  </inertial>
+  <visual>
+    <origin xyz="-0.079859 0.1575 -0.061" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/front_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="dark_grey"/>
+  </visual>
+  <collision>
+    <origin xyz="-0.079859 0.1575 -0.061" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/front_right_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="rear_left_wheel_1">
+  <inertial>
+    <origin xyz="-3.417599554567108e-05 0.0012578780563165526 0.00020667360282916603" rpy="0 0 0"/>
+    <mass value="0.5352306866247557"/>
+    <inertia ixx="0.000808" iyy="0.001256" izz="0.000812" ixy="-0.0" iyz="-0.0" ixz="1e-06"/>
+  </inertial>
+  <visual>
+    <origin xyz="0.079859 -0.1595 -0.061" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/rear_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="dark_grey"/>
+  </visual>
+  <collision>
+    <origin xyz="0.079859 -0.1595 -0.061" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/rear_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="front_left_wheel_1">
+  <inertial>
+    <origin xyz="-3.3585377828562746e-05 0.0012578780563166914 0.00020667360282897174" rpy="0 0 0"/>
+    <mass value="0.5352306866247557"/>
+    <inertia ixx="0.000808" iyy="0.001256" izz="0.000812" ixy="-0.0" iyz="-0.0" ixz="1e-06"/>
+  </inertial>
+  <visual>
+    <origin xyz="-0.079859 -0.1595 -0.061" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/front_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="dark_grey"/>
+  </visual>
+  <collision>
+    <origin xyz="-0.079859 -0.1595 -0.061" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/front_left_wheel_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="lidar_1">
+  <inertial>
+    <origin xyz="-0.0006699831389366528 -1.684403434149538e-05 0.022853133112458512" rpy="0 0 0"/>
+    <mass value="2.1559203937792097"/>
+    <inertia ixx="0.001441" iyy="0.001374" izz="0.00201" ixy="1e-06" iyz="1e-06" ixz="4e-05"/>
+  </inertial>
+  <visual>
+    <origin xyz="-0.0875 0.0 -0.155" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/lidar_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="black"/>
+  </visual>
+  <collision>
+    <origin xyz="-0.0875 0.0 -0.155" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/lidar_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<link name="tower_1">
+  <inertial>
+    <origin xyz="0.0854385892934485 -0.0010965480335846886 0.136853332767428" rpy="0 0 0"/>
+    <mass value="8.076336158551934"/>
+    <inertia ixx="0.20008" iyy="0.122445" izz="0.108217" ixy="0.000348" iyz="-0.002386" ixz="0.015825"/>
+  </inertial>
+  <visual>
+    <origin xyz="0.175 -0.003515 -0.182485" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/tower_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+    <material name="white"/>
+  </visual>
+  <collision>
+    <origin xyz="0.175 -0.003515 -0.182485" rpy="0 0 0"/>
+    <geometry>
+      <mesh filename="package://surveillance_bot_description/meshes/tower_1.stl" scale="0.001 0.001 0.001"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="rear_right_wheel_joint" type="continuous">
+  <origin xyz="-0.079859 -0.1575 0.061" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="rear_right_wheel_1"/>
+  <axis xyz="-0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="front_right_wheel_joint" type="continuous">
+  <origin xyz="0.079859 -0.1575 0.061" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="front_right_wheel_1"/>
+  <axis xyz="-0.0 -1.0 0.0"/>
+</joint>
+
+<joint name="rear_left_wheel_joint" type="continuous">
+  <origin xyz="-0.079859 0.1595 0.061" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="rear_left_wheel_1"/>
+  <axis xyz="0.0 1.0 -0.0"/>
+</joint>
+
+<joint name="front_left_wheel_joint" type="continuous">
+  <origin xyz="0.079859 0.1595 0.061" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="front_left_wheel_1"/>
+  <axis xyz="0.0 1.0 -0.0"/>
+</joint>
+
+<joint name="lidar_joint" type="fixed">
+  <origin xyz="0.0875 0.0 0.155" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="lidar_1"/>
+</joint>
+
+<joint name="tower_joint" type="fixed">
+  <origin xyz="-0.175 0.003515 0.182485" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="tower_1"/>
+</joint>
+
+</robot>
