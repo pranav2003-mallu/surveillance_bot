@@ -1,3 +1,7 @@
+/* ==========================================
+ * Developed by Humynex Robotics
+ * We make your ideas into reality
+ * ========================================== */
 #define USE_BASE
 
 // PID and communications config

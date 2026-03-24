@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
+# ==========================================
+# Developed by Humynex Robotics
+# We make your ideas into reality
+# ==========================================
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist, TransformStamped
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Bool
 import serial
 import math
 from tf2_ros import TransformBroadcaster
@@ -43,11 +46,6 @@ class PicoBridge(Node):
 
         # ROS 2 Interfaces
         self.create_subscription(Twist, '/cmd_vel', self.cmd_cb, 10)
-        
-        # Relay / LED Module Subscriptions
-        self.create_subscription(Bool, '/relay1', self.relay1_cb, 10)
-        self.create_subscription(Bool, '/relay2', self.relay2_cb, 10)
-        
         self.odom_pub = self.create_publisher(Odometry, '/odom', 10)
         self.tf_broadcaster = TransformBroadcaster(self)
         
@@ -103,19 +101,6 @@ class PicoBridge(Node):
 
         # Send 'm' command (MOTOR_SPEEDS)
         self.send_command(f"m {left_ticks_per_frame} {right_ticks_per_frame}\r")
-
-    def relay1_cb(self, msg: Bool):
-        # DIGITAL_WRITE command: 'w <pin> <value>'
-        # Pin 26 corresponds to Relay 1 on Pico
-        val = 1 if msg.data else 0
-        self.send_command(f"w 26 {val}\r")
-        self.get_logger().info(f"💡 Relay 1 Set: {'ON' if msg.data else 'OFF'}")
-
-    def relay2_cb(self, msg: Bool):
-        # Pin 27 corresponds to Relay 2 on Pico
-        val = 1 if msg.data else 0
-        self.send_command(f"w 27 {val}\r")
-        self.get_logger().info(f"💡 Relay 2 Set: {'ON' if msg.data else 'OFF'}")
 
     def odom_loop(self):
         if not (self.ser and self.ser.is_open):
