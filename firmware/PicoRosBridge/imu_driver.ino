@@ -6,10 +6,20 @@ void initIMU() {
   Wire1.setSDA(14);
   Wire1.setSCL(15);
   Wire1.begin();
+
+  // Reset the MPU6050
   Wire1.beginTransmission(MPU_ADDR);
   Wire1.write(0x6B); // PWR_MGMT_1 register
-  Wire1.write(0);    // Set to zero (wakes up the MPU-6050)
+  Wire1.write(0x80); // Set reset bit
   Wire1.endTransmission(true);
+  delay(100); // Wait for reset
+
+  // Wake up the MPU6050
+  Wire1.beginTransmission(MPU_ADDR);
+  Wire1.write(0x6B); // PWR_MGMT_1 register
+  Wire1.write(0x00); // Clear sleep bit
+  Wire1.endTransmission(true);
+  delay(100); // Wait for wake up
 }
 
 bool readIMU(float* ax, float* ay, float* az, float* gx, float* gy, float* gz) {
