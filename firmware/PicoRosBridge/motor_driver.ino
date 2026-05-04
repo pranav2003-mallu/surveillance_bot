@@ -21,11 +21,11 @@ void setMotorSpeed(int i, int spd) {
       analogWrite(LEFT_RPWM, 0); analogWrite(LEFT_LPWM, pwm);
     }
   } else {
-    // RIGHT (Inverted for physical mirroring)
+    // RIGHT
     if (spd >= 0) {
-      analogWrite(RIGHT_RPWM, 0); analogWrite(RIGHT_LPWM, pwm);
-    } else {
       analogWrite(RIGHT_RPWM, pwm); analogWrite(RIGHT_LPWM, 0);
+    } else {
+      analogWrite(RIGHT_RPWM, 0); analogWrite(RIGHT_LPWM, pwm);
     }
   }
 }

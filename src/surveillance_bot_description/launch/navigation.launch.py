@@ -63,6 +63,18 @@ def generate_launch_description():
             launch_arguments={'serial_port': lidar_port, 'frame_id': 'lidar_1'}.items()
         ),
 
+        # 3.5 IMU Filter (Calculates 3D orientation from raw MPU6050 data)
+        Node(
+            package='imu_filter_madgwick',
+            executable='imu_filter_madgwick_node',
+            name='imu_filter',
+            parameters=[
+                {'use_mag': False},
+                {'publish_tf': False},
+                {'world_frame': 'enu'}
+            ]
+        ),
+
         # 4. Scan Filter (180 Crop)
         Node(
             package='surveillance_bot_description',
