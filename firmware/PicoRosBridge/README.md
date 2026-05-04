@@ -1,37 +1,28 @@
 # PicoRosBridge for Skid-Steer Mobile Robot
 
-This firmware is a complete adaptation of the ROS Arduino Bridge for the Raspberry Pi Pico, specially modified for a 4-wheel skid-steer robot using two L298N motor drivers.
+This firmware is a complete adaptation of the ROS Arduino Bridge for the Raspberry Pi Pico, specially modified for a 4-wheel skid-steer robot using two BTS7960 motor drivers (with motors wired in parallel).
 
 ## Hardware Configuration
 This code handles:
 * **4 x L-shape Waveshare 12V gear motors**
-* **2 x L298N motor drivers**
+* **2 x BTS7960 motor drivers** (Motors wired in parallel per side)
 * **2 rear wheel encoders**
 * **Communication via Serial over USB** to ROS 2 Humble.
 
 ### Pi Pico Pin Mapping
 
-#### Motors (L298N x 2)
-The Pico controls all 4 motors.
-**Left-Side L298N:**
-- LF (Left-Front) Motor:
-  - `PWM` (ENA): Pin 6
-  - `IN1`: Pin 7
-  - `IN2`: Pin 8
-- LR (Left-Rear) Motor:
-  - `PWM` (ENB): Pin 9
-  - `IN1`: Pin 10
-  - `IN2`: Pin 11
+#### Motors (BTS7960 x 2)
+The Pico controls the left and right sides independently. You will connect both left motors to the Left Driver, and both right motors to the Right Driver.
 
-**Right-Side L298N:**
-- RF (Right-Front) Motor:
-  - `PWM` (ENA): Pin 12
-  - `IN1`: Pin 13
-  - `IN2`: Pin 14
-- RR (Right-Rear) Motor:
-  - `PWM` (ENB): Pin 15
-  - `IN1`: Pin 16
-  - `IN2`: Pin 17
+**Left-Side BTS7960 (Controls LF & LR Motors):**
+- `EN` (R_EN/L_EN): Pin 2
+- `RPWM` (Forward): Pin 3
+- `LPWM` (Reverse): Pin 4
+
+**Right-Side BTS7960 (Controls RF & RR Motors):**
+- `EN` (R_EN/L_EN): Pin 5
+- `RPWM` (Forward): Pin 6
+- `LPWM` (Reverse): Pin 7
 
 #### Encoders
 Encoders use hardware interrupts for high-speed tracking.

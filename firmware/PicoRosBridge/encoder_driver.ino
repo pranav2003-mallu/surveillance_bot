@@ -7,7 +7,7 @@ volatile long r_enc_pos = 0L;
 // SKID STEER: Only REAR encoders used for PID feedback
 // Using all 4 encoders would double-count ticks and
 // cause the PID to reduce PWM, stalling motors.
-// Front encoder pins are configured but NOT attached.
+// Front encoder pins are completely removed from code.
 // =====================================================
 
 // Left Rear Encoder ISR (only rear left)

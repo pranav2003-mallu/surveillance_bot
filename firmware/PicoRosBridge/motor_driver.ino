@@ -1,10 +1,12 @@
 #ifdef USE_BASE
 
 void initMotorController() {
-  pinMode(LF_PWM, OUTPUT); pinMode(LF_IN1, OUTPUT); pinMode(LF_IN2, OUTPUT);
-  pinMode(LR_PWM, OUTPUT); pinMode(LR_IN1, OUTPUT); pinMode(LR_IN2, OUTPUT);
-  pinMode(RF_PWM, OUTPUT); pinMode(RF_IN1, OUTPUT); pinMode(RF_IN2, OUTPUT);
-  pinMode(RR_PWM, OUTPUT); pinMode(RR_IN1, OUTPUT); pinMode(RR_IN2, OUTPUT);
+  pinMode(LEFT_EN, OUTPUT); pinMode(LEFT_RPWM, OUTPUT); pinMode(LEFT_LPWM, OUTPUT);
+  pinMode(RIGHT_EN, OUTPUT); pinMode(RIGHT_RPWM, OUTPUT); pinMode(RIGHT_LPWM, OUTPUT);
+  
+  // Enable motor drivers
+  digitalWrite(LEFT_EN, HIGH);
+  digitalWrite(RIGHT_EN, HIGH);
 }
 
 void setMotorSpeed(int i, int spd) {
@@ -14,25 +16,17 @@ void setMotorSpeed(int i, int spd) {
   
   if (i == LEFT) {
     if (spd >= 0) {
-      digitalWrite(LF_IN1, HIGH); digitalWrite(LF_IN2, LOW);
-      digitalWrite(LR_IN1, HIGH); digitalWrite(LR_IN2, LOW);
+      analogWrite(LEFT_RPWM, pwm); analogWrite(LEFT_LPWM, 0);
     } else {
-      digitalWrite(LF_IN1, LOW); digitalWrite(LF_IN2, HIGH);
-      digitalWrite(LR_IN1, LOW); digitalWrite(LR_IN2, HIGH);
+      analogWrite(LEFT_RPWM, 0); analogWrite(LEFT_LPWM, pwm);
     }
-    analogWrite(LF_PWM, pwm);
-    analogWrite(LR_PWM, pwm);
   } else {
     // RIGHT
     if (spd >= 0) {
-      digitalWrite(RF_IN1, HIGH); digitalWrite(RF_IN2, LOW);
-      digitalWrite(RR_IN1, HIGH); digitalWrite(RR_IN2, LOW);
+      analogWrite(RIGHT_RPWM, pwm); analogWrite(RIGHT_LPWM, 0);
     } else {
-      digitalWrite(RF_IN1, LOW); digitalWrite(RF_IN2, HIGH);
-      digitalWrite(RR_IN1, LOW); digitalWrite(RR_IN2, HIGH);
+      analogWrite(RIGHT_RPWM, 0); analogWrite(RIGHT_LPWM, pwm);
     }
-    analogWrite(RF_PWM, pwm);
-    analogWrite(RR_PWM, pwm);
   }
 }
 
