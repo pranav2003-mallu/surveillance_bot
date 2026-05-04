@@ -13,8 +13,8 @@ typedef struct SetPointInfo {
 SetPointInfo leftPID, rightPID;
 
 /* PID Parameters. Can be tuned dynamically via command 'u' */
-int Kp = 20;
-int Kd = 12;
+int Kp = 10;
+int Kd = 5;
 int Ki = 0;
 int Ko = 50;
 

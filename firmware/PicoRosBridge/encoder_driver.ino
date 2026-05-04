@@ -17,7 +17,8 @@ void lrEncoderISR() {
 
 // Right Rear Encoder ISR (only rear right)
 void rrEncoderISR() {
-  if (digitalRead(RR_ENC_PIN_A) == digitalRead(RR_ENC_PIN_B)) r_enc_pos--; else r_enc_pos++;
+  // Swapped to match the inverted motor polarity
+  if (digitalRead(RR_ENC_PIN_A) == digitalRead(RR_ENC_PIN_B)) r_enc_pos++; else r_enc_pos--;
 }
 
 void initEncoders() {
