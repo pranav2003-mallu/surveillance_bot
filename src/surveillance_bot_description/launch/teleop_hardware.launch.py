@@ -56,19 +56,19 @@ def generate_launch_description():
             output='screen'
         ),
 
-        # 5. Teleop Keyboard (Opens in a new terminal window)
-        Node(
-            package='teleop_twist_keyboard',
-            executable='teleop_twist_keyboard',
-            prefix='xterm -e',
-            output='screen'
-        ),
+        # 5. Teleop Keyboard (Opens in a new terminal window) - Run this on your Laptop!
+        # Node(
+        #     package='teleop_twist_keyboard',
+        #     executable='teleop_twist_keyboard',
+        #     prefix='xterm -e',
+        #     output='screen'
+        # ),
 
-        # 6. RViz2 (For visualizing the physical movement)
-        Node(
-            package='rviz2',
-            executable='rviz2',
-            arguments=['-d', rviz_config],
-            output='screen'
-        ),
+        # 6. RViz2 (For visualizing the physical movement) - Run this on your Laptop!
+        # Node(
+        #     package='rviz2',
+        #     executable='rviz2',
+        #     arguments=['-d', rviz_config],
+        #     output='screen'
+        # ),
     ])
