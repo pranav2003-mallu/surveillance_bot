@@ -31,8 +31,10 @@ class PicoBridge(Node):
         # GUI-Editable Parameters
         self.declare_parameter('port_name', '/dev/ttyACM0')
         self.declare_parameter('baud_rate', 115200)
+        self.declare_parameter('publish_tf', True)
         self.port_name = self.get_parameter('port_name').value
         self.baud_rate = self.get_parameter('baud_rate').value
+        self.publish_tf = self.get_parameter('publish_tf').value
 
         # Listen for GUI Parameter Changes
         self.add_on_set_parameters_callback(self.parameter_callback)
@@ -134,15 +136,16 @@ class PicoBridge(Node):
         q_w = math.cos(th / 2.0)
 
         # TF Broadcast (odom -> base_footprint)
-        t = TransformStamped()
-        t.header.stamp = current_time.to_msg()
-        t.header.frame_id = 'odom'
-        t.child_frame_id = 'base_footprint'
-        t.transform.translation.x = x
-        t.transform.translation.y = y
-        t.transform.rotation.z = q_z
-        t.transform.rotation.w = q_w
-        self.tf_broadcaster.sendTransform(t)
+        if self.publish_tf:
+            t = TransformStamped()
+            t.header.stamp = current_time.to_msg()
+            t.header.frame_id = 'odom'
+            t.child_frame_id = 'base_footprint'
+            t.transform.translation.x = x
+            t.transform.translation.y = y
+            t.transform.rotation.z = q_z
+            t.transform.rotation.w = q_w
+            self.tf_broadcaster.sendTransform(t)
 
         # Odometry Message
         odom = Odometry()

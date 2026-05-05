@@ -15,6 +15,7 @@ def generate_launch_description():
     pico_port = LaunchConfiguration('pico_port')
 
     xacro_file = os.path.join(pkg_share, 'urdf', 'surveillance_bot.xacro')
+    ekf_config_path = os.path.join(pkg_share, 'config', 'ekf.yaml')
 
     robot_desc = ParameterValue(Command(['xacro ', xacro_file]), value_type=str)
 
@@ -27,7 +28,7 @@ def generate_launch_description():
         Node(package='tf2_ros', executable='static_transform_publisher', arguments=['0', '0', '0', '0', '0', '0', 'base_footprint', 'base_link']),
 
         # Hardware Bridge (Pico)
-        Node(package='surveillance_bot_description', executable='pico_bridge.py', parameters=[{'port_name': pico_port}]),
+        Node(package='surveillance_bot_description', executable='pico_bridge.py', parameters=[{'port_name': pico_port, 'publish_tf': False}]),
 
         # RPLidar
         IncludeLaunchDescription(
@@ -45,4 +46,13 @@ def generate_launch_description():
 
         # Scan Filter
         Node(package='surveillance_bot_description', executable='scan_filter.py', name='scan_filter'),
+
+        # EKF Sensor Fusion (Odom + IMU -> odom TF)
+        Node(
+            package='robot_localization',
+            executable='ekf_node',
+            name='ekf_filter_node',
+            output='screen',
+            parameters=[ekf_config_path]
+        ),
     ])
