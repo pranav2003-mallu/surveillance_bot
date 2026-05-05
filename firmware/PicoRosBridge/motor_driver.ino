@@ -16,23 +16,19 @@ void setMotorSpeed(int i, int spd) {
   
   if (i == LEFT) {
     if (spd >= 0) {
-      pinMode(LEFT_LPWM, OUTPUT);
-      digitalWrite(LEFT_LPWM, LOW);
+      analogWrite(LEFT_LPWM, 0);
       analogWrite(LEFT_RPWM, pwm);
     } else {
-      pinMode(LEFT_RPWM, OUTPUT);
-      digitalWrite(LEFT_RPWM, LOW);
+      analogWrite(LEFT_RPWM, 0);
       analogWrite(LEFT_LPWM, pwm);
     }
   } else {
     // RIGHT (Not inverted, wiring matches left)
     if (spd >= 0) {
-      pinMode(RIGHT_LPWM, OUTPUT);
-      digitalWrite(RIGHT_LPWM, LOW);
+      analogWrite(RIGHT_LPWM, 0);
       analogWrite(RIGHT_RPWM, pwm);
     } else {
-      pinMode(RIGHT_RPWM, OUTPUT);
-      digitalWrite(RIGHT_RPWM, LOW);
+      analogWrite(RIGHT_RPWM, 0);
       analogWrite(RIGHT_LPWM, pwm);
     }
   }

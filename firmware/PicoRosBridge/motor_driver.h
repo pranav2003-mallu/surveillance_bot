@@ -9,7 +9,7 @@
 // Right Motors (Front and Rear wired in parallel)
 #define RIGHT_EN 5   // R_EN and L_EN tied together
 #define RIGHT_RPWM 6 // R_PWM (Forward)
-#define RIGHT_LPWM 8 // L_PWM (Reverse) - Moved from Pin 7 to avoid Slice 3 conflict
+#define RIGHT_LPWM 8// L_PWM (Reverse) - Moved from Pin 7 to avoid Slice 3 conflict
 
 void initMotorController();
 void setMotorSpeed(int i, int spd);
