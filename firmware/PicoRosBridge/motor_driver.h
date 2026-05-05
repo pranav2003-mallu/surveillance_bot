@@ -9,7 +9,7 @@
 // Right Motors (Front and Rear wired in parallel)
 #define RIGHT_EN 5   // R_EN and L_EN tied together
 #define RIGHT_RPWM 6 // R_PWM (Forward)
-#define RIGHT_LPWM 9 // L_PWM (Reverse) - Moved to Pin 9 due to dead pin/wire on 7
+#define RIGHT_LPWM 7 // L_PWM (Reverse)
 
 void initMotorController();
 void setMotorSpeed(int i, int spd);
