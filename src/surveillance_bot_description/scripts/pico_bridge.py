@@ -22,8 +22,8 @@ class PicoBridge(Node):
         self.TICKS_PER_REV = 330.0 # Encoder ticks per revolution (Adjust if needed)
         self.PID_RATE = 30.0       # Hz (Must match Pico firmware)
         
-        self.KP = 50
-        self.KD = 20
+        self.KP = 15
+        self.KD = 8
         self.KI = 0
         self.KO = 10
         # ==========================================
