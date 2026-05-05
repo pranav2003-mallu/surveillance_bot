@@ -86,13 +86,13 @@ def generate_launch_description():
             launch_arguments={'slam_params_file': slam_params, 'use_sim_time': 'False'}.items()
         ),
         
-        # Teleop Keyboard
-        Node(
-            package='teleop_twist_keyboard',
-            executable='teleop_twist_keyboard',
-            prefix='xterm -e',
-            output='screen'
-        ),
+        # Teleop Keyboard (Run this on laptop instead)
+        # Node(
+        #     package='teleop_twist_keyboard',
+        #     executable='teleop_twist_keyboard',
+        #     prefix='xterm -e',
+        #     output='screen'
+        # ),
         
 
         # 6. RViz2 (GUI Controllable)

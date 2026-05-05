@@ -2,6 +2,8 @@
 
 const int MPU_ADDR = 0x68; // I2C address of the MPU-6050
 
+float gyroXoffset = 0, gyroYoffset = 0, gyroZoffset = 0;
+
 void initIMU() {
   Wire1.setSDA(14);
   Wire1.setSCL(15);
@@ -20,6 +22,28 @@ void initIMU() {
   Wire1.write(0x00); // Clear sleep bit
   Wire1.endTransmission(true);
   delay(100); // Wait for wake up
+
+  // Configure to specific ranges to be absolutely sure
+  Wire1.beginTransmission(MPU_ADDR);
+  Wire1.write(0x1B); // GYRO_CONFIG
+  Wire1.write(0x00); // +/- 250 deg/s
+  Wire1.endTransmission(true);
+
+  // Calibrate Gyro on boot (Must keep robot completely still!)
+  long gxSum = 0, gySum = 0, gzSum = 0;
+  for(int i=0; i<200; i++) {
+    Wire1.beginTransmission(MPU_ADDR);
+    Wire1.write(0x43);
+    Wire1.endTransmission(false);
+    Wire1.requestFrom(MPU_ADDR, 6, true);
+    gxSum += (int16_t)(Wire1.read() << 8 | Wire1.read());
+    gySum += (int16_t)(Wire1.read() << 8 | Wire1.read());
+    gzSum += (int16_t)(Wire1.read() << 8 | Wire1.read());
+    delay(3);
+  }
+  gyroXoffset = gxSum / 200.0;
+  gyroYoffset = gySum / 200.0;
+  gyroZoffset = gzSum / 200.0;
 }
 
 bool readIMU(float* ax, float* ay, float* az, float* gx, float* gy, float* gz) {
@@ -51,9 +75,9 @@ bool readIMU(float* ax, float* ay, float* az, float* gx, float* gy, float* gz) {
   *ay = accelY / 16384.0;
   *az = accelZ / 16384.0;
   
-  *gx = gyroX / 131.0;
-  *gy = gyroY / 131.0;
-  *gz = gyroZ / 131.0;
+  *gx = (gyroX - gyroXoffset) / 131.0;
+  *gy = (gyroY - gyroYoffset) / 131.0;
+  *gz = (gyroZ - gyroZoffset) / 131.0;
   
   return true;
 }
