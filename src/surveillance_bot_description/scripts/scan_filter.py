@@ -36,9 +36,9 @@ class ScanFilter(Node):
         for i in range(len(new_ranges)):
             angle = msg.angle_min + (i * msg.angle_increment)
             
-            # Your specific condition:
-            if -1.57 < angle < 1.57: 
-                new_ranges[i] = float('inf') # Mask this area
+            # Keep only the FRONT half of the scan (angles outside ±90° are masked)
+            if not (-1.57 < angle < 1.57): 
+                new_ranges[i] = float('inf') # Mask rear half
         
         msg.ranges = new_ranges
         self.pub.publish(msg)
