@@ -1,6 +1,10 @@
 slam_toolbox:
   ros__parameters:
-    # --- TOPIC & FRAME SETTINGS ---
+    # --- QoS OVERRIDES (Force SLAM to accept Best Effort LiDAR) ---
+    qos_overrides:
+      /scan_filtered:
+        subscriber:
+          reliability: best_effort
     scan_topic: /scan_filtered   # <--- LISTENS TO FILTERED DATA
     odom_frame: odom
     map_frame: map

@@ -16,13 +16,15 @@ class ScanFilter(Node):
         self._publish_interval = 1.0 / PUBLISH_RATE_HZ  # seconds
         self._last_pub_time = None  # will be set on first publish
 
-        # Input QoS: keep enough history to not drop lidar packets
+        # Input QoS: keep enough history to not drop lidar packets from the driver
         sub_qos = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             history=HistoryPolicy.KEEP_LAST,
             depth=10
         )
-        # Output QoS: depth=1 — always deliver the LATEST scan, drop stale ones
+        
+        # Output QoS: MUST BE BEST_EFFORT for high-frequency sensor data over WiFi.
+        # (This matches the qos_overrides we added to the SLAM Toolbox yaml)
         pub_qos = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             history=HistoryPolicy.KEEP_LAST,
@@ -33,7 +35,7 @@ class ScanFilter(Node):
         self.pub = self.create_publisher(LaserScan, '/scan_filtered', pub_qos)
 
         self.get_logger().info(
-            f"✅ Scan Filter Active: /scan -> /scan_filtered @ {PUBLISH_RATE_HZ} Hz"
+            f"✅ Scan Filter Active: /scan -> /scan_filtered @ {PUBLISH_RATE_HZ} Hz (BEST_EFFORT QoS)"
         )
 
     def scan_cb(self, msg):
@@ -58,9 +60,9 @@ class ScanFilter(Node):
 
         msg.ranges = new_ranges
         
-        # CRITICAL FIX: We DO NOT overwrite the timestamp with now.to_msg()
-        # We keep the original hardware timestamp from the LiDAR.
-        # Ensure chrony is running on both Pi and Laptop for time sync!
+        # CRITICAL FIX: We explicitly DO NOT overwrite the timestamp here.
+        # Preserving the original hardware timestamp allows SLAM Toolbox 
+        # to accurately match the scan with the correct odometry frame.
         
         self.pub.publish(msg)
 
