@@ -33,6 +33,13 @@ def generate_launch_description():
             arguments=['0', '0', '0', '0', '0', '0', 'base_footprint', 'base_link']
         ),
 
+        # Scan Filter — runs on laptop so restamp uses laptop clock (matches TF clock)
+        Node(
+            package='surveillance_bot_description',
+            executable='scan_filter.py',
+            name='scan_filter'
+        ),
+
         # SLAM Toolbox
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(slam_pkg, 'launch', 'online_async_launch.py')),
