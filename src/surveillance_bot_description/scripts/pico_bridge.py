@@ -11,10 +11,17 @@ class PicoBridge(Node):
         super().__init__('pico_bridge')
         
         # ==========================================
-        #        HARDWARE KINEMATICS
+        #        HARDWARE KINEMATICS & TUNING
         # ==========================================
         self.WHEEL_BASE = 0.317    # Meters (distance between wheels)
-        self.MAX_SPEED_MPS = 1.5   # Meters per second (est. top speed for PWM mapping)
+        
+        # Top physical speed for 100% PWM power
+        self.MAX_SPEED_MPS = 0.50  
+        
+        # Minimum PWM (0-255) to overcome motor friction. 
+        # Increase this if the motors just hum without spinning.
+        self.MIN_POWER = 75        
+        
         self.PID_RATE = 30.0       # Hz
         # ==========================================
 
@@ -31,13 +38,13 @@ class PicoBridge(Node):
         self.ser = None
         self.connect_serial()
 
-        # ROS 2 Interfaces (WHEEL ODOMETRY REMOVED)
+        # ROS 2 Interfaces
         self.create_subscription(Twist, '/cmd_vel', self.cmd_cb, 10)
         self.imu_pub = self.create_publisher(Imu, '/imu/data_raw', 10)
         
-        # Serial Read Loop (Keeps buffer clear & fetches IMU)
+        # Serial Read Loop
         self.create_timer(1.0 / self.PID_RATE, self.serial_loop)
-        self.get_logger().info(f"✅ Pico Bridge Started on {self.port_name} (OPEN-LOOP PWM MODE).")
+        self.get_logger().info(f"✅ Pico Bridge Started on {self.port_name} (OPEN-LOOP PWM MODE with DEADBAND).")
 
     def parameter_callback(self, params):
         for param in params:
@@ -67,16 +74,31 @@ class PicoBridge(Node):
         v = msg.linear.x
         w = msg.angular.z
         
-        # Calculate target meters per second for each wheel
+        # 1. Calculate target meters per second for each wheel
         v_left = v - (w * self.WHEEL_BASE / 2.0)
         v_right = v + (w * self.WHEEL_BASE / 2.0)
 
-        # OPEN LOOP PWM MAPPING (0-255)
-        # We map the requested speed directly to a 0-255 PWM signal.
-        left_pwm = int(max(min((v_left / self.MAX_SPEED_MPS) * 255.0, 255), -255))
-        right_pwm = int(max(min((v_right / self.MAX_SPEED_MPS) * 255.0, 255), -255))
+        # 2. Calculate raw proportional PWM (0-255 scale)
+        raw_left = (v_left / self.MAX_SPEED_MPS) * 255.0
+        raw_right = (v_right / self.MAX_SPEED_MPS) * 255.0
 
-        # Send raw PWM commands to the Pico
+        # 3. Apply Minimum Power Deadband for Left Wheel
+        if raw_left > 0.01:
+            left_pwm = int(max(self.MIN_POWER, min(raw_left, 255)))
+        elif raw_left < -0.01:
+            left_pwm = int(min(-self.MIN_POWER, max(raw_left, -255)))
+        else:
+            left_pwm = 0
+
+        # 4. Apply Minimum Power Deadband for Right Wheel
+        if raw_right > 0.01:
+            right_pwm = int(max(self.MIN_POWER, min(raw_right, 255)))
+        elif raw_right < -0.01:
+            right_pwm = int(min(-self.MIN_POWER, max(raw_right, -255)))
+        else:
+            right_pwm = 0
+
+        # 5. Send raw PWM commands to the Pico
         self.send_command(f"m {left_pwm} {right_pwm}\r")
 
     def serial_loop(self):
@@ -94,7 +116,7 @@ class PicoBridge(Node):
                     continue
                 
                 parts = line.split()
-                # Wheel Odometry math is ignored. We only parse the IMU string.
+                # Parse the IMU string if it matches expected length
                 if len(parts) == 6:
                     ax, ay, az, gx, gy, gz = map(float, parts)
                     self.publish_imu(ax, ay, az, gx, gy, gz)
