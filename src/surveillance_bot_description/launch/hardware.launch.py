@@ -28,7 +28,7 @@ def generate_launch_description():
         Node(package='tf2_ros', executable='static_transform_publisher', arguments=['0', '0', '0', '0', '0', '0', 'base_footprint', 'base_link']),
 
         # Hardware Bridge (Pico)
-        Node(package='surveillance_bot_description', executable='pico_bridge.py', parameters=[{'port_name': pico_port, 'publish_tf': False}]),
+        Node(package='surveillance_bot_description', executable='pico_bridge.py', parameters=[{'port_name': pico_port, 'publish_tf': True}]),
 
         # RPLidar
         IncludeLaunchDescription(

@@ -57,8 +57,11 @@ class ScanFilter(Node):
                 new_ranges[i] = float('inf')  # mask robot's back
 
         msg.ranges = new_ranges
-        # Restamp to current time so SLAM/RViz TF lookup always succeeds
-        msg.header.stamp = now.to_msg()
+        
+        # CRITICAL FIX: We DO NOT overwrite the timestamp with now.to_msg()
+        # We keep the original hardware timestamp from the LiDAR.
+        # Ensure chrony is running on both Pi and Laptop for time sync!
+        
         self.pub.publish(msg)
 
 def main():
