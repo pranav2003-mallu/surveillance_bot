@@ -15,44 +15,49 @@ def generate_launch_description():
     pico_port = LaunchConfiguration('pico_port')
 
     xacro_file = os.path.join(pkg_share, 'urdf', 'surveillance_bot.xacro')
-    ekf_config_path = os.path.join(pkg_share, 'config', 'ekf.yaml')
-
+    
+    # The Jazzy Fix: Strict string typing for the URDF
     robot_desc = ParameterValue(Command(['xacro ', xacro_file]), value_type=str)
 
     return LaunchDescription([
         DeclareLaunchArgument('lidar_port', default_value='/dev/ttyUSB0'),
         DeclareLaunchArgument('pico_port', default_value='/dev/ttyACM0'),
 
-        Node(package='robot_state_publisher', executable='robot_state_publisher', parameters=[{'robot_description': robot_desc}]),
-        Node(package='joint_state_publisher', executable='joint_state_publisher', name='joint_state_publisher', parameters=[{'robot_description': robot_desc}]),
-        Node(package='tf2_ros', executable='static_transform_publisher', arguments=['0', '0', '0', '0', '0', '0', 'base_footprint', 'base_link']),
+        # 1. Robot State, Joints, & Transforms (CRITICAL to run on Pi)
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            parameters=[{'robot_description': robot_desc}]
+        ),
+        Node(
+            package='joint_state_publisher',
+            executable='joint_state_publisher',
+            name='joint_state_publisher',
+            parameters=[{'robot_description': robot_desc}]
+        ),
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=['0', '0', '0', '0', '0', '0', 'base_footprint', 'base_link']
+        ),
 
-        # Hardware Bridge (Pico)
-        Node(package='surveillance_bot_description', executable='pico_bridge.py', parameters=[{'port_name': pico_port, 'publish_tf': True}]),
+        # 2. Hardware Bridge (Pico) - MUST publish_tf to send Odometry to Laptop
+        Node(
+            package='surveillance_bot_description',
+            executable='pico_bridge.py',
+            parameters=[{'port_name': pico_port, 'publish_tf': True}]
+        ),
 
-        # RPLidar
+        # 3. RPLidar
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(rplidar_pkg, 'launch', 'rplidar_a1_launch.py')),
             launch_arguments={'serial_port': lidar_port, 'frame_id': 'lidar_1'}.items()
         ),
 
-        # IMU Filter - DISABLED (IMU drift causes phantom motion when static)
-        # Node(
-        #     package='imu_filter_madgwick',
-        #     executable='imu_filter_madgwick_node',
-        #     name='imu_filter',
-        #     parameters=[{'use_mag': False}, {'publish_tf': False}, {'world_frame': 'enu'}]
-        # ),
-
-        # Scan Filter
-        Node(package='surveillance_bot_description', executable='scan_filter.py', name='scan_filter'),
-
-        # EKF Sensor Fusion - DISABLED (IMU drift causing issues, using odom-only)
-        # Node(
-        #     package='robot_localization',
-        #     executable='ekf_node',
-        #     name='ekf_filter_node',
-        #     output='screen',
-        #     parameters=[ekf_config_path]
-        # ),
+        # 4. Scan Filter (Reduces WiFi load so Laptop gets smooth data)
+        Node(
+            package='surveillance_bot_description',
+            executable='scan_filter.py',
+            name='scan_filter'
+        ),
     ])
