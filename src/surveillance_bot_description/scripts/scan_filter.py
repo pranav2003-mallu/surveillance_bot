@@ -42,6 +42,8 @@ class ScanFilter(Node):
                 new_ranges[i] = float('inf') # Mask robot's back
         
         msg.ranges = new_ranges
+        # Restamp to current time so SLAM/RViz TF lookup doesn't fail
+        msg.header.stamp = self.get_clock().now().to_msg()
         self.pub.publish(msg)
 
 def main():
