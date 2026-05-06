@@ -4,7 +4,6 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Imu
 import serial
-import math
 from rcl_interfaces.msg import SetParametersResult
 
 class PicoBridge(Node):
@@ -12,17 +11,11 @@ class PicoBridge(Node):
         super().__init__('pico_bridge')
         
         # ==========================================
-        #        HARDWARE TUNING THRESHOLDS 
+        #        HARDWARE KINEMATICS
         # ==========================================
-        self.WHEEL_RADIUS = 0.065  # Meters
-        self.WHEEL_BASE = 0.317    # Meters 
-        self.TICKS_PER_REV = 330.0 # Encoder ticks
+        self.WHEEL_BASE = 0.317    # Meters (distance between wheels)
+        self.MAX_SPEED_MPS = 1.5   # Meters per second (est. top speed for PWM mapping)
         self.PID_RATE = 30.0       # Hz
-        
-        self.KP = 15
-        self.KD = 8
-        self.KI = 0
-        self.KO = 10
         # ==========================================
 
         # GUI-Editable Parameters
@@ -37,15 +30,14 @@ class PicoBridge(Node):
 
         self.ser = None
         self.connect_serial()
-        self.send_command(f"u {self.KP}:{self.KD}:{self.KI}:{self.KO}\r")
 
         # ROS 2 Interfaces (WHEEL ODOMETRY REMOVED)
         self.create_subscription(Twist, '/cmd_vel', self.cmd_cb, 10)
         self.imu_pub = self.create_publisher(Imu, '/imu/data_raw', 10)
         
-        # Serial Read Loop (Keeps buffer clear)
+        # Serial Read Loop (Keeps buffer clear & fetches IMU)
         self.create_timer(1.0 / self.PID_RATE, self.serial_loop)
-        self.get_logger().info(f"✅ Pico Bridge Started on {self.port_name} (MOTOR CONTROL ONLY).")
+        self.get_logger().info(f"✅ Pico Bridge Started on {self.port_name} (OPEN-LOOP PWM MODE).")
 
     def parameter_callback(self, params):
         for param in params:
@@ -75,19 +67,17 @@ class PicoBridge(Node):
         v = msg.linear.x
         w = msg.angular.z
         
+        # Calculate target meters per second for each wheel
         v_left = v - (w * self.WHEEL_BASE / 2.0)
         v_right = v + (w * self.WHEEL_BASE / 2.0)
 
-        meters_per_tick = (2.0 * math.pi * self.WHEEL_RADIUS) / self.TICKS_PER_REV
-        
-        left_ticks_per_sec = v_left / meters_per_tick
-        right_ticks_per_sec = v_right / meters_per_tick
+        # OPEN LOOP PWM MAPPING (0-255)
+        # We map the requested speed directly to a 0-255 PWM signal.
+        left_pwm = int(max(min((v_left / self.MAX_SPEED_MPS) * 255.0, 255), -255))
+        right_pwm = int(max(min((v_right / self.MAX_SPEED_MPS) * 255.0, 255), -255))
 
-        left_ticks_per_frame = round(left_ticks_per_sec / self.PID_RATE)
-        right_ticks_per_frame = round(right_ticks_per_sec / self.PID_RATE)
-
-        # Send 'm' command (MOTOR_SPEEDS)
-        self.send_command(f"m {left_ticks_per_frame} {right_ticks_per_frame}\r")
+        # Send raw PWM commands to the Pico
+        self.send_command(f"m {left_pwm} {right_pwm}\r")
 
     def serial_loop(self):
         if not (self.ser and self.ser.is_open):
@@ -104,8 +94,7 @@ class PicoBridge(Node):
                     continue
                 
                 parts = line.split()
-                # Wheel Odometry math is completely ignored now.
-                # We only parse the IMU string if needed.
+                # Wheel Odometry math is ignored. We only parse the IMU string.
                 if len(parts) == 6:
                     ax, ay, az, gx, gy, gz = map(float, parts)
                     self.publish_imu(ax, ay, az, gx, gy, gz)
@@ -117,6 +106,7 @@ class PicoBridge(Node):
         imu_msg.header.stamp = self.get_clock().now().to_msg()
         imu_msg.header.frame_id = 'base_link'
         
+        # Convert raw IMU to ROS standard units
         imu_msg.linear_acceleration.x = ax * 9.80665
         imu_msg.linear_acceleration.y = ay * 9.80665
         imu_msg.linear_acceleration.z = az * 9.80665
