@@ -10,13 +10,15 @@ def generate_launch_description():
     pkg_share = get_package_share_directory('surveillance_bot_description')
     nav2_launch_dir = os.path.join(get_package_share_directory('nav2_bringup'), 'launch')
 
+    # Default to the map you just saved!
+    default_map_path = os.path.join(pkg_share, 'maps', 'my_first_map.yaml')
     map_yaml = LaunchConfiguration('map')  
 
     nav2_params = os.path.join(pkg_share, 'config', 'nav2_params.yaml')
     rviz_config_path = os.path.join(pkg_share, 'rviz', 'rviz.rviz')
 
     return LaunchDescription([
-        DeclareLaunchArgument('map', description='Full path to map yaml file to load'),
+        DeclareLaunchArgument('map', default_value=default_map_path, description='Full path to map yaml file to load'),
 
         # Nav2 Bringup
         IncludeLaunchDescription(
