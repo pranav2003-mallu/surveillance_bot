@@ -30,7 +30,7 @@ def generate_launch_description():
         DeclareLaunchArgument('map', description='Full path to map yaml file to load'),
         DeclareLaunchArgument('lidar_port', default_value='/dev/ttyUSB0'),
         DeclareLaunchArgument('pico_port', default_value='/dev/ttyACM0'),
-        DeclareLaunchArgument('use_rviz', default_value='True', description='Launch RViz?'),
+        DeclareLaunchArgument('use_rviz', default_value='False', description='Launch RViz? (Keep False on Pi)'),
 
         # 1. Robot State, Joints, & Transforms
         Node(
@@ -63,7 +63,24 @@ def generate_launch_description():
             launch_arguments={'serial_port': lidar_port, 'frame_id': 'lidar_1'}.items()
         ),
 
-        # 3.5 IMU Filter (Calculates 3D orientation from raw MPU6050 data)
+        # 4. Laser Odometry (CRITICAL: Replaces wheel encoders)
+        Node(
+            package='rf2o_laser_odometry',
+            executable='rf2o_laser_odometry_node',
+            name='rf2o_laser_odometry',
+            output='screen',
+            parameters=[{
+                'laser_scan_topic': '/scan',  
+                'odom_topic': '/odom',
+                'publish_tf': True,
+                'base_frame_id': 'base_footprint',
+                'odom_frame_id': 'odom',
+                'init_pose_from_topic': '',
+                'freq': 10.0
+            }]
+        ),
+
+        # 5. IMU Filter (Calculates 3D orientation from raw MPU6050 data)
         Node(
             package='imu_filter_madgwick',
             executable='imu_filter_madgwick_node',
@@ -75,14 +92,14 @@ def generate_launch_description():
             ]
         ),
 
-        # 4. Scan Filter (180 Crop)
+        # 6. Scan Filter (180 Crop)
         Node(
             package='surveillance_bot_description',
             executable='scan_filter.py',
             name='scan_filter'
         ),
 
-        # 5. Nav2 Bringup
+        # 7. Nav2 Bringup
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
             launch_arguments={
@@ -93,7 +110,7 @@ def generate_launch_description():
             }.items()
         ),
 
-        # 6. RViz2 (GUI Controllable)
+        # 8. RViz2 (GUI Controllable)
         Node(
             package='rviz2',
             executable='rviz2',

@@ -28,7 +28,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument('lidar_port', default_value='/dev/ttyUSB0'),
         DeclareLaunchArgument('pico_port', default_value='/dev/ttyACM0'),
-        DeclareLaunchArgument('use_rviz', default_value='True', description='Launch RViz?'),
+        DeclareLaunchArgument('use_rviz', default_value='False', description='Launch RViz? (Keep False on Pi)'),
 
         # 1. Robot State, Joints, & Transforms
         Node(
@@ -61,41 +61,37 @@ def generate_launch_description():
             launch_arguments={'serial_port': lidar_port, 'frame_id': 'lidar_1'}.items()
         ),
 
-        # 3.5 IMU Filter - DISABLED (IMU drift causes phantom motion when static)
-        # Node(
-        #     package='imu_filter_madgwick',
-        #     executable='imu_filter_madgwick_node',
-        #     name='imu_filter',
-        #     parameters=[
-        #         {'use_mag': False},
-        #         {'publish_tf': False},
-        #         {'world_frame': 'enu'}
-        #     ]
-        # ),
+        # 4. Laser Odometry (CRITICAL: Replaces wheel encoders)
+        Node(
+            package='rf2o_laser_odometry',
+            executable='rf2o_laser_odometry_node',
+            name='rf2o_laser_odometry',
+            output='screen',
+            parameters=[{
+                'laser_scan_topic': '/scan',  
+                'odom_topic': '/odom',
+                'publish_tf': True,
+                'base_frame_id': 'base_footprint',
+                'odom_frame_id': 'odom',
+                'init_pose_from_topic': '',
+                'freq': 10.0
+            }]
+        ),
 
-        # 4. Scan Filter (180 Crop)
+        # 5. Scan Filter (180 Crop)
         Node(
             package='surveillance_bot_description',
             executable='scan_filter.py',
             name='scan_filter'
         ),
 
-        # 5. SLAM Toolbox
+        # 6. SLAM Toolbox
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(slam_pkg, 'launch', 'online_async_launch.py')),
             launch_arguments={'slam_params_file': slam_params, 'use_sim_time': 'False'}.items()
         ),
         
-        # Teleop Keyboard (Run this on laptop instead)
-        # Node(
-        #     package='teleop_twist_keyboard',
-        #     executable='teleop_twist_keyboard',
-        #     prefix='xterm -e',
-        #     output='screen'
-        # ),
-        
-
-        # 6. RViz2 (GUI Controllable)
+        # 7. RViz2 (GUI Controllable)
         Node(
             package='rviz2',
             executable='rviz2',
