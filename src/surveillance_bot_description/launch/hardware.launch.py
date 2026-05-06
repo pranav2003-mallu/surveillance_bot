@@ -44,9 +44,8 @@ def generate_launch_description():
         #     parameters=[{'use_mag': False}, {'publish_tf': False}, {'world_frame': 'enu'}]
         # ),
 
-        # Scan Filter - moved to laptop_mapping.launch.py
-        # (so restamping uses laptop clock, matching local TF clock)
-        # Node(package='surveillance_bot_description', executable='scan_filter.py', name='scan_filter'),
+        # Scan Filter
+        Node(package='surveillance_bot_description', executable='scan_filter.py', name='scan_filter'),
 
         # EKF Sensor Fusion - DISABLED (IMU drift causing issues, using odom-only)
         # Node(
