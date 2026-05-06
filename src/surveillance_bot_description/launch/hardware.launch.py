@@ -23,7 +23,7 @@ def generate_launch_description():
         DeclareLaunchArgument('lidar_port', default_value='/dev/ttyUSB0'),
         DeclareLaunchArgument('pico_port', default_value='/dev/ttyACM0'),
 
-        # 1. Robot State, Joints, & Transforms (CRITICAL to run on Pi)
+        # 1. Robot State, Joints, & Transforms
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
@@ -41,11 +41,11 @@ def generate_launch_description():
             arguments=['0', '0', '0', '0', '0', '0', 'base_footprint', 'base_link']
         ),
 
-        # 2. Hardware Bridge (Pico) - MUST publish_tf to send Odometry to Laptop
+        # 2. Hardware Bridge (Pico) - Motor Control ONLY
         Node(
             package='surveillance_bot_description',
             executable='pico_bridge.py',
-            parameters=[{'port_name': pico_port, 'publish_tf': True}]
+            parameters=[{'port_name': pico_port}]
         ),
 
         # 3. RPLidar
@@ -59,5 +59,22 @@ def generate_launch_description():
             package='surveillance_bot_description',
             executable='scan_filter.py',
             name='scan_filter'
+        ),
+
+        # 5. Laser Odometry (Replaces Wheel Encoders)
+        Node(
+            package='rf2o_laser_odometry',
+            executable='rf2o_laser_odometry_node',
+            name='rf2o_laser_odometry',
+            output='screen',
+            parameters=[{
+                'laser_scan_topic': '/scan_filtered',
+                'odom_topic': '/odom',
+                'publish_tf': True,
+                'base_frame_id': 'base_footprint',
+                'odom_frame_id': 'odom',
+                'init_pose_from_topic': '',
+                'freq': 10.0
+            }]
         ),
     ])
