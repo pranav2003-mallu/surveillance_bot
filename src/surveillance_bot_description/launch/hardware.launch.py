@@ -36,23 +36,23 @@ def generate_launch_description():
             launch_arguments={'serial_port': lidar_port, 'frame_id': 'lidar_1'}.items()
         ),
 
-        # IMU Filter
-        Node(
-            package='imu_filter_madgwick',
-            executable='imu_filter_madgwick_node',
-            name='imu_filter',
-            parameters=[{'use_mag': False}, {'publish_tf': False}, {'world_frame': 'enu'}]
-        ),
+        # IMU Filter - DISABLED (IMU drift causes phantom motion when static)
+        # Node(
+        #     package='imu_filter_madgwick',
+        #     executable='imu_filter_madgwick_node',
+        #     name='imu_filter',
+        #     parameters=[{'use_mag': False}, {'publish_tf': False}, {'world_frame': 'enu'}]
+        # ),
 
         # Scan Filter
         Node(package='surveillance_bot_description', executable='scan_filter.py', name='scan_filter'),
 
-        # EKF Sensor Fusion (Odom + IMU -> odom TF)
-        Node(
-            package='robot_localization',
-            executable='ekf_node',
-            name='ekf_filter_node',
-            output='screen',
-            parameters=[ekf_config_path]
-        ),
+        # EKF Sensor Fusion - DISABLED (IMU drift causing issues, using odom-only)
+        # Node(
+        #     package='robot_localization',
+        #     executable='ekf_node',
+        #     name='ekf_filter_node',
+        #     output='screen',
+        #     parameters=[ekf_config_path]
+        # ),
     ])
