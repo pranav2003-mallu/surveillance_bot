@@ -80,26 +80,14 @@ def generate_launch_description():
             }]
         ),
 
-        # 5. IMU Filter (Calculates 3D orientation from raw MPU6050 data)
-        Node(
-            package='imu_filter_madgwick',
-            executable='imu_filter_madgwick_node',
-            name='imu_filter',
-            parameters=[
-                {'use_mag': False},
-                {'publish_tf': False},
-                {'world_frame': 'enu'}
-            ]
-        ),
-
-        # 6. Scan Filter (180 Crop)
+        # 5. Scan Filter (180 Crop)
         Node(
             package='surveillance_bot_description',
             executable='scan_filter.py',
             name='scan_filter'
         ),
 
-        # 7. Nav2 Bringup
+        # 6. Nav2 Bringup
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(nav2_launch_dir, 'bringup_launch.py')),
             launch_arguments={
@@ -110,7 +98,7 @@ def generate_launch_description():
             }.items()
         ),
 
-        # 8. RViz2 (GUI Controllable)
+        # 7. RViz2 (GUI Controllable - Typically run separately on laptop)
         Node(
             package='rviz2',
             executable='rviz2',
