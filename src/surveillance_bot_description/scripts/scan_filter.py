@@ -8,21 +8,25 @@ class ScanFilter(Node):
     def __init__(self):
         super().__init__('scan_filter')
         
-        # --- DEFINING BEST EFFORT EXPLICITLY ---
-        # This creates the "Best Effort" rule manually so you can see it.
-        # It tells ROS: "If a packet is lost, don't worry, just send the next one."
-        qos_policy = QoSProfile(
+        # Input QoS: keep enough history to not drop lidar packets
+        sub_qos = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             history=HistoryPolicy.KEEP_LAST,
             depth=10
         )
+        # Output QoS: depth=1 — always deliver the LATEST scan, drop stale ones
+        # This prevents the RViz/SLAM message queue from filling up over WiFi
+        pub_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1
+        )
 
-        # Input: Listen to the raw scan using Best Effort
-        self.create_subscription(LaserScan, '/scan', self.scan_cb, qos_policy)
+        # Input: Listen to the raw scan
+        self.create_subscription(LaserScan, '/scan', self.scan_cb, sub_qos)
         
-        # Output: Publish the filtered scan using Best Effort
-        # This makes it compatible with Nav2 default settings.
-        self.pub = self.create_publisher(LaserScan, '/scan_filtered', qos_policy)
+        # Output: Publish the filtered scan
+        self.pub = self.create_publisher(LaserScan, '/scan_filtered', pub_qos)
         
         self.get_logger().info("✅ Scan Filter Active: /scan -> /scan_filtered (Reliability: BEST_EFFORT)")
 
