@@ -23,8 +23,8 @@ class PicoBridge(Node):
         self.MIN_POWER = 90        
         
         # 2. SKID-STEER BOOST: Turning requires massive torque to drag tires sideways.
-        # This artificially multiplies turn commands so the motors push through the friction.
-        self.TURN_BOOST = 3.0      
+        # Reduced to 1.5 to prevent violent oscillations (to-and-fro motion).
+        self.TURN_BOOST = 1.5      
 
         self.PID_RATE = 30.0       # Hz
         # ==========================================
@@ -83,25 +83,21 @@ class PicoBridge(Node):
         v_left = v - (boosted_w * self.WHEEL_BASE / 2.0)
         v_right = v + (boosted_w * self.WHEEL_BASE / 2.0)
 
-        # Calculate raw proportional PWM (0-255 scale)
-        raw_left = (v_left / self.MAX_SPEED_MPS) * 255.0
-        raw_right = (v_right / self.MAX_SPEED_MPS) * 255.0
+        # Calculate fraction of max speed
+        frac_left = v_left / self.MAX_SPEED_MPS
+        frac_right = v_right / self.MAX_SPEED_MPS
 
-        # Apply Minimum Power Deadband for Left Wheel
-        if raw_left > 0.01:
-            left_pwm = int(max(self.MIN_POWER, min(raw_left, 255)))
-        elif raw_left < -0.01:
-            left_pwm = int(min(-self.MIN_POWER, max(raw_left, -255)))
-        else:
-            left_pwm = 0
+        # Smooth deadband mapping to avoid snapping to MIN_POWER and oscillating
+        def compute_pwm(frac):
+            if frac > 0.01:
+                return int(self.MIN_POWER + min(frac, 1.0) * (255 - self.MIN_POWER))
+            elif frac < -0.01:
+                return int(-self.MIN_POWER + max(frac, -1.0) * (255 - self.MIN_POWER))
+            else:
+                return 0
 
-        # Apply Minimum Power Deadband for Right Wheel
-        if raw_right > 0.01:
-            right_pwm = int(max(self.MIN_POWER, min(raw_right, 255)))
-        elif raw_right < -0.01:
-            right_pwm = int(min(-self.MIN_POWER, max(raw_right, -255)))
-        else:
-            right_pwm = 0
+        left_pwm = compute_pwm(frac_left)
+        right_pwm = compute_pwm(frac_right)
 
         # Send raw PWM commands to the Pico
         self.send_command(f"m {left_pwm} {right_pwm}\r")

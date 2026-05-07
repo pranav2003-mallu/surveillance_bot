@@ -97,10 +97,10 @@ controller_server:
       vx_std: 0.6
       vy_std: 0.0
       wz_std: 1.0
-      vx_max: 0.50 # Lowered to stop fast crashing
-      vx_min: 0.0 # Higher negative limit allows backwards curving
+      vx_max: 0.40 # Lowered to stop fast crashing
+      vx_min: -0.35 # Fixed negative limit allows backwards curving
       vy_max: 0.0
-      wz_max: 3.0
+      wz_max: 1.5 # Lowered to prevent violent rotation requests
       iteration_count: 1
       prune_distance: 1.7
       transform_tolerance: 0.1
@@ -150,7 +150,7 @@ controller_server:
       PathAlignCritic:
         enabled: true
         cost_power: 1
-        cost_weight: 5.0
+        cost_weight: 2.0
         max_path_occupancy_ratio: 0.05
         trajectory_point_step: 4
         threshold_to_consider: 0.5
@@ -340,8 +340,8 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.50, 0.0, 3.0] 
-    min_velocity: [0.0, 0.0, -3.0]
+    max_velocity: [0.40, 0.0, 1.5] 
+    min_velocity: [-0.35, 0.0, -1.5]
     max_accel: [1.5, 0.0, 2.0]
     max_decel: [-1.5, 0.0, -2.0]
     odom_topic: "odom"
