@@ -97,10 +97,10 @@ controller_server:
       vx_std: 0.6
       vy_std: 0.0
       wz_std: 1.0
-      vx_max: 0.40 # Lowered to stop fast crashing
+      vx_max: 0.50 # Restored slightly higher limit
       vx_min: -0.35 # Fixed negative limit allows backwards curving
       vy_max: 0.0
-      wz_max: 1.5 # Lowered to prevent violent rotation requests
+      wz_max: 2.0 # Restored slightly higher limit
       iteration_count: 1
       prune_distance: 1.7
       transform_tolerance: 0.1
@@ -113,7 +113,7 @@ controller_server:
         trajectory_step: 5
         time_step: 3
       AckermannConstraints:
-        min_turning_r: 0.2
+        min_turning_r: 0.0 # CRITICAL: Must be 0.0 for skid-steer / differential drive!
       critics: [
         "ConstraintCritic", "CostCritic", "GoalCritic",
         "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic",
@@ -340,8 +340,8 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.40, 0.0, 1.5] 
-    min_velocity: [-0.35, 0.0, -1.5]
+    max_velocity: [0.55, 0.0, 2.5] 
+    min_velocity: [-0.40, 0.0, -2.5]
     max_accel: [1.5, 0.0, 2.0]
     max_decel: [-1.5, 0.0, -2.0]
     odom_topic: "odom"
