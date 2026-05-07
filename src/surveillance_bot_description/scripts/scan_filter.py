@@ -26,9 +26,9 @@ class ScanFilter(Node):
         # Output QoS: MUST BE BEST_EFFORT for high-frequency sensor data over WiFi.
         # (This matches the qos_overrides we added to the SLAM Toolbox yaml)
         pub_qos = QoSProfile(
-            reliability=ReliabilityPolicy.BEST_EFFORT,
+            reliability=ReliabilityPolicy.RELIABLE,
             history=HistoryPolicy.KEEP_LAST,
-            depth=1
+            depth=10
         )
 
         self.create_subscription(LaserScan, '/scan', self.scan_cb, sub_qos)
