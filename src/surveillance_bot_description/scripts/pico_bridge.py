@@ -21,10 +21,6 @@ class PicoBridge(Node):
         
         # Minimum PWM (0-255) to overcome motor friction. 
         self.MIN_POWER = 90        
-        
-        # 2. SKID-STEER BOOST: Turning requires massive torque to drag tires sideways.
-        # Reduced to 1.5 to prevent violent oscillations (to-and-fro motion).
-        self.TURN_BOOST = 1.5      
 
         self.PID_RATE = 30.0       # Hz
         # ==========================================
@@ -48,7 +44,7 @@ class PicoBridge(Node):
         
         # Serial Read Loop
         self.create_timer(1.0 / self.PID_RATE, self.serial_loop)
-        self.get_logger().info(f"✅ Pico Bridge Started (OPEN-LOOP | SKID-STEER BOOST MODE).")
+        self.get_logger().info(f"✅ Pico Bridge Started (OPEN-LOOP | NO BOOST MODE).")
 
     def parameter_callback(self, params):
         for param in params:
@@ -80,15 +76,10 @@ class PicoBridge(Node):
         if abs(v) > 0.05 and abs(w) < 0.05:
             w = 0.0
 
-        # Dynamically calculate boost based on linear velocity. 
-        # When v is low, we need high boost for in-place/tight turns.
-        # When v is high, we don't need as much boost.
-        current_boost = 1.0 + (self.TURN_BOOST - 1.0) * (1.0 - min(abs(v) / 0.5, 1.0))
-        boosted_w = w * current_boost
-
-        # Calculate target meters per second for each wheel
-        v_left = v - (boosted_w * self.WHEEL_BASE / 2.0)
-        v_right = v + (boosted_w * self.WHEEL_BASE / 2.0)
+        # Calculate target meters per second for each wheel without any artificial boost.
+        # This matches the MPPI predictive model exactly.
+        v_left = v - (w * self.WHEEL_BASE / 2.0)
+        v_right = v + (w * self.WHEEL_BASE / 2.0)
 
         # Calculate fraction of max speed
         frac_left = v_left / self.MAX_SPEED_MPS

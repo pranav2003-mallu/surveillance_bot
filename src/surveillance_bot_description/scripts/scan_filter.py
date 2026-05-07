@@ -7,7 +7,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 # Publish rate limit — RPLidar A1 runs at 10 Hz but RViz over WiFi
 # can't keep up. Throttling to 5 Hz prevents the message filter queue
 # from filling up while still giving SLAM enough scan data.
-PUBLISH_RATE_HZ = 5.0
+PUBLISH_RATE_HZ = 10.0
 
 class ScanFilter(Node):
     def __init__(self):
