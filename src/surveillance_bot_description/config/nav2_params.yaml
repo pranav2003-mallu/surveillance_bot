@@ -62,8 +62,8 @@ bt_navigator:
 controller_server:
   ros__parameters:
     controller_frequency: 20.0
-    costmap_update_timeout: 0.30
-    min_x_velocity_threshold: 0.001 #change it to match the vx_min
+    costmap_update_timeout: 1.00 # Increased from 0.30 because 5Hz scan filter over WiFi drops packets, causing premature timeout and Spin recovery
+    min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
     failure_tolerance: 0.3
@@ -205,9 +205,9 @@ local_costmap:
           marking: True
           data_type: "LaserScan"
           raytrace_max_range: 3.0
-          raytrace_min_range: 0.0
+          raytrace_min_range: 0.20
           obstacle_max_range: 2.5
-          obstacle_min_range: 0.05 #it ignores obstacle in 5 cm from lidar
+          obstacle_min_range: 0.20 # Increased to ignore the robot's own 0.15m chassis footprint
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
@@ -237,9 +237,9 @@ global_costmap:
           marking: True
           data_type: "LaserScan"
           raytrace_max_range: 3.0
-          raytrace_min_range: 0.0
+          raytrace_min_range: 0.20
           obstacle_max_range: 2.5
-          obstacle_min_range: 0.05 #it ignores obstacle in 5 cm from lidar
+          obstacle_min_range: 0.20 # Increased to ignore the robot's own 0.15m chassis footprint
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
