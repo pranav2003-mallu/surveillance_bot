@@ -22,7 +22,7 @@ def generate_launch_description():
     slam_params = os.path.join(pkg_share, 'config', 'mapper_params_online_async.yaml')
     rviz_config_path = os.path.join(pkg_share, 'rviz', 'rviz.rviz')
 
-    # The Jazzy Fix: Strict string typing for the URDF
+    # Strict string typing for the URDF
     robot_desc = ParameterValue(Command(['xacro ', xacro_file]), value_type=str)
 
     return LaunchDescription([
@@ -48,7 +48,7 @@ def generate_launch_description():
             arguments=['0', '0', '0', '0', '0', '0', 'base_footprint', 'base_link']
         ),
 
-        # 2. Hardware Bridge (Pico)
+        # 2. Hardware Bridge (Pico - Open Loop PWM)
         Node(
             package='surveillance_bot_description',
             executable='pico_bridge.py',
@@ -61,7 +61,7 @@ def generate_launch_description():
             launch_arguments={'serial_port': lidar_port, 'frame_id': 'lidar_1'}.items()
         ),
 
-        # 4. Laser Odometry (CRITICAL: Replaces wheel encoders)
+        # 4. Laser Odometry (CRITICAL: Replaces wheel encoders, listens to raw /scan)
         Node(
             package='rf2o_laser_odometry',
             executable='rf2o_laser_odometry_node',
@@ -78,7 +78,7 @@ def generate_launch_description():
             }]
         ),
 
-        # 5. Scan Filter (180 Crop)
+        # 5. Scan Filter (Provides /scan_filtered for Costmaps)
         Node(
             package='surveillance_bot_description',
             executable='scan_filter.py',
@@ -91,7 +91,7 @@ def generate_launch_description():
             launch_arguments={'slam_params_file': slam_params, 'use_sim_time': 'False'}.items()
         ),
         
-        # 7. RViz2 (GUI Controllable)
+        # 7. RViz2 (GUI Controllable - Do not run on Pi)
         Node(
             package='rviz2',
             executable='rviz2',
