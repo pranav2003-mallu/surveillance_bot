@@ -15,12 +15,11 @@ class PicoBridge(Node):
         # ==========================================
         self.WHEEL_BASE = 0.317    # Meters (distance between wheels)
         
-        # 1. INCREASED TOP SPEED: This makes linear driving less aggressive.
-        # Now, a request of 0.5m/s will only output ~40% PWM instead of 100%.
         self.MAX_SPEED_MPS = 1.2  
         
-        # Minimum PWM (0-255) to overcome motor friction. 
-        self.MIN_POWER = 90        
+        # Split Power Profiles: Overcome skid-steer friction!
+        self.MIN_POWER_LINEAR = 90   # Power just to roll forward
+        self.MIN_POWER_TURN = 150    # EXTRA POWER to force the wheels to scrub and turn
 
         self.PID_RATE = 30.0       # Hz
         # ==========================================
@@ -44,7 +43,7 @@ class PicoBridge(Node):
         
         # Serial Read Loop
         self.create_timer(1.0 / self.PID_RATE, self.serial_loop)
-        self.get_logger().info(f"✅ Pico Bridge Started (OPEN-LOOP | NO BOOST MODE).")
+        self.get_logger().info(f"✅ Pico Bridge Started (SPLIT POWER TURN MODE).")
 
     def parameter_callback(self, params):
         for param in params:
@@ -76,8 +75,7 @@ class PicoBridge(Node):
         if abs(v) > 0.05 and abs(w) < 0.05:
             w = 0.0
 
-        # Calculate target meters per second for each wheel without any artificial boost.
-        # This matches the MPPI predictive model exactly.
+        # Match the MPPI predictive model
         v_left = v - (w * self.WHEEL_BASE / 2.0)
         v_right = v + (w * self.WHEEL_BASE / 2.0)
 
@@ -85,12 +83,17 @@ class PicoBridge(Node):
         frac_left = v_left / self.MAX_SPEED_MPS
         frac_right = v_right / self.MAX_SPEED_MPS
 
-        # Smooth deadband mapping to avoid snapping to MIN_POWER and oscillating
+        # Detect if the controller is asking for a turn
+        is_turning = abs(w) > 0.1
+
         def compute_pwm(frac):
+            # Apply the higher minimum power if we are turning
+            base_power = self.MIN_POWER_TURN if is_turning else self.MIN_POWER_LINEAR
+            
             if frac > 0.01:
-                return int(self.MIN_POWER + min(frac, 1.0) * (255 - self.MIN_POWER))
+                return int(base_power + min(frac, 1.0) * (255 - base_power))
             elif frac < -0.01:
-                return int(-self.MIN_POWER + max(frac, -1.0) * (255 - self.MIN_POWER))
+                return int(-base_power + max(frac, -1.0) * (255 - base_power))
             else:
                 return 0
 
