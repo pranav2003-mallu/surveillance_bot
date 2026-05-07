@@ -76,8 +76,15 @@ class PicoBridge(Node):
         v = msg.linear.x
         w = msg.angular.z
         
-        # Apply the TURN_BOOST to the angular component to overcome side-friction
-        boosted_w = w * self.TURN_BOOST
+        # Prevent micro-oscillations on straight paths
+        if abs(v) > 0.05 and abs(w) < 0.05:
+            w = 0.0
+
+        # Dynamically calculate boost based on linear velocity. 
+        # When v is low, we need high boost for in-place/tight turns.
+        # When v is high, we don't need as much boost.
+        current_boost = 1.0 + (self.TURN_BOOST - 1.0) * (1.0 - min(abs(v) / 0.5, 1.0))
+        boosted_w = w * current_boost
 
         # Calculate target meters per second for each wheel
         v_left = v - (boosted_w * self.WHEEL_BASE / 2.0)
@@ -105,12 +112,14 @@ class PicoBridge(Node):
     def serial_loop(self):
         if not (self.ser and self.ser.is_open):
             return
+            
         self.send_command("q\r")
         self.send_command("i\r")
         
-        for _ in range(2):
+        # Read available lines without blocking the ROS executor
+        while self.ser.in_waiting > 0:
             try:
-                line = self.ser.readline().decode('utf-8').strip()
+                line = self.ser.readline().decode('utf-8', errors='ignore').strip()
                 if not line or line == "ERR":
                     continue
                 parts = line.split()
